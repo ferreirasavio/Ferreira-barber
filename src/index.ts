@@ -8,5 +8,5 @@ app.use(express.json());
 app.use(scheduleRoutes);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running at ${PORT}`);
 });

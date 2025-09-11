@@ -1,10 +1,13 @@
+import dotenv from "dotenv";
 import { Pool } from "pg";
 
+dotenv.config();
+
 const pool = new Pool({
-  user: "savio.ferreira", // se precisar pegar do ambiente, usar process.env.USER
-  host: "localhost", // se precisar pegar do ambiente, usar process.env.HOST
-  database: "db_ferreira_barber", // se precisar pegar do ambiente, usar process
-  port: 5432, // se precisar pegar do ambiente, usar process.env.PORT
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
 });
 
 export default pool;
