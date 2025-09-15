@@ -10,5 +10,5 @@ const PORT = 3333;
 app.use(express_1.default.json());
 app.use(routes_1.default);
 app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`🚀 Server running at ${PORT}`);
 });
