@@ -20,6 +20,14 @@ type ScheduleParams = {
 export const createSchedule = async (req: Request, res: Response) => {
   try {
     const { name, phone, scheduled_at, type_cut } = req.body;
+
+    if (!name || !phone || !scheduled_at || !type_cut) {
+      return res.status(400).json({
+        error: "Dados obrigatórios não informados",
+        message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
+      });
+    }
+
     const newSchedule = await schedulingTime({
       name,
       phone,
@@ -29,6 +37,10 @@ export const createSchedule = async (req: Request, res: Response) => {
     res.status(201).json(newSchedule);
   } catch (error) {
     console.error("Error creating schedule:", error);
+    res.status(500).json({
+      error: "Erro interno do servidor",
+      message: "Não foi possível criar o agendamento",
+    });
   }
 };
 
@@ -38,6 +50,10 @@ export const getSchedules = async (req: Request, res: Response) => {
     res.status(200).json(schedules);
   } catch (error) {
     console.error("Error fetching schedules:", error);
+    res.status(500).json({
+      error: "Erro interno do servidor",
+      message: "Não foi possível buscar os agendamentos",
+    });
   }
 };
 
@@ -84,5 +100,9 @@ export const removeSchedule = async (
     res.status(200).json({ message: `Agendamento ${id} deletado!` });
   } catch (error) {
     console.error("Error deleting schedule:", error);
+    res.status(500).json({
+      error: "Erro interno do servidor",
+      message: "Não foi possível deletar o agendamento",
+    });
   }
 };

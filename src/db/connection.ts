@@ -9,11 +9,12 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
+  // Supabase já vem com SSL configurado
+  ssl: process.env.DB_HOST?.includes('supabase') ? { rejectUnauthorized: false } : false,
+  // Configurações otimizadas para Lambda
+  max: 1,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
-
-pool
-  .connect()
-  .then(() => console.log("✅ Connected to Supabase"))
-  .catch((err) => console.error("❌ Connection error:", err));
 
 export default pool;
