@@ -15,6 +15,12 @@ export const lambdaHandler = async (
   // Configurar timeout para Lambda
   context.callbackWaitsForEmptyEventLoop = false;
 
+  if (event.body && typeof event.body === "string") {
+    try {
+      event.body = JSON.parse(event.body);
+    } catch (e) {}
+  }
+
   try {
     const result = await handler(event, context);
     return result as APIGatewayProxyResult;

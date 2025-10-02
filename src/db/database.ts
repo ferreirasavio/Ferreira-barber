@@ -4,7 +4,7 @@ import { TDatabase } from "./types";
 export async function schedulingTime(schedule: TDatabase) {
   try {
     const query = `
-      INSERT INTO schedule (name, phone, scheduled_at, type_cut)
+      INSERT INTO schedules (name, phone, scheduled_at, type_cut)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
@@ -26,7 +26,7 @@ export async function schedulingTime(schedule: TDatabase) {
 
 export async function getAllSchedules() {
   try {
-    const query = `SELECT * FROM schedule;`;
+    const query = `SELECT * FROM schedules;`;
     const result = await pool.query(query);
     return result.rows;
   } catch (error) {
@@ -56,7 +56,7 @@ export async function updateSchedule(
       throw new Error("Nenhum campo fornecido para atualização.");
     }
 
-    const query = `UPDATE schedule SET ${setClauses.join(
+    const query = `UPDATE schedules SET ${setClauses.join(
       ", "
     )} WHERE id = $${index} RETURNING *;`;
     values.push(id);
@@ -71,7 +71,7 @@ export async function updateSchedule(
 
 export async function deleteSchedule(id: number) {
   try {
-    const query = `DELETE FROM schedule WHERE id=$1;`;
+    const query = `DELETE FROM schedules WHERE id=$1;`;
     const result = await pool.query(query, [id]);
     return result.rowCount;
   } catch (error) {

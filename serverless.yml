@@ -10,7 +10,7 @@ provider:
   memorySize: 256
   timeout: 30
   environment:
-    NODE_ENV: production
+    NODE_ENV: ${env:NODE_ENV}
     DB_HOST: ${env:DB_HOST}
     DB_PORT: ${env:DB_PORT}
     DB_NAME: ${env:DB_NAME}
@@ -33,6 +33,7 @@ provider:
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
+  - serverless-dotenv-plugin
 
 functions:
   api:
@@ -52,9 +53,7 @@ custom:
 
 package:
   exclude:
-    - node_modules/**
     - .git/**
     - test/**
     - "*.md"
-    - .env*
     - .env.example
