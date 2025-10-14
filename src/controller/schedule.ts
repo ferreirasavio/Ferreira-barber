@@ -1,31 +1,27 @@
-import { Request, Response } from "express";
 import {
   deleteSchedule,
   getAllSchedules,
   schedulingTime,
   updateSchedule,
 } from "../db/database";
+import { TDatabase } from "../db/types";
 
-type ScheduleBody = {
-  name: string;
-  phone: string;
-  scheduled_at: string;
-  type_cut: "cabelo" | "barba" | "cabelo e barba";
+type ScheduleArgs = {
+  id?: number;
+  input: TDatabase;
 };
 
-type ScheduleParams = {
-  id: number;
-};
-
-export const createSchedule = async (req: Request, res: Response) => {
+export const createSchedule = async (input: TDatabase) => {
   try {
-    const { name, phone, scheduled_at, type_cut } = req.body;
-
+    const { name, phone, scheduled_at, type_cut } = input;
+    console.log(input);
     if (!name || !phone || !scheduled_at || !type_cut) {
-      return res.status(400).json({
+      console.log("Input recebido:", input);
+      return {
+        status: 400,
         error: "Dados obrigatórios não informados",
         message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
-      });
+      };
     }
 
     const newSchedule = await schedulingTime({
@@ -34,75 +30,97 @@ export const createSchedule = async (req: Request, res: Response) => {
       scheduled_at,
       type_cut,
     });
-    res.status(201).json(newSchedule);
+    return {
+      status: 201,
+      data: newSchedule,
+    };
   } catch (error) {
     console.error("Error creating schedule:", error);
-    res.status(500).json({
+
+    return {
+      status: 500,
       error: "Erro interno do servidor",
       message: "Não foi possível criar o agendamento",
-    });
+    };
   }
 };
 
-export const getSchedules = async (req: Request, res: Response) => {
+export const getSchedules = async () => {
   try {
     const schedules = await getAllSchedules();
-    res.status(200).json(schedules);
+    return {
+      status: 200,
+      data: schedules,
+    };
   } catch (error) {
     console.error("Error fetching schedules:", error);
-    res.status(500).json({
+    return {
+      status: 500,
       error: "Erro interno do servidor",
       message: "Não foi possível buscar os agendamentos",
-    });
+    };
   }
 };
 
-export const updateFields = async (
-  req: Request<ScheduleParams, ScheduleBody>,
-  res: Response
-) => {
+export const updateFields = async (args: ScheduleArgs) => {
   try {
-    const { id } = req.params;
-    const { name, phone, scheduled_at, type_cut } = req.body;
+    const { name, phone, scheduled_at, type_cut } = args.input;
 
-    if (!id) {
-      return res.status(400).json({ error: "ID do agendamento é obrigatório" });
+    if (!args.id) {
+      return {
+        status: 400,
+        error: "ID do agendamento é obrigatório",
+      };
     }
 
     if (!name && !phone && !scheduled_at && !type_cut) {
-      return res
-        .status(400)
-        .json({ error: "Nenhum campo foi preenchido para atualizar" });
+      return {
+        status: 400,
+        error: "Nenhum campo foi preenchido para atualizar",
+      };
     }
-    await updateSchedule(id, { name, phone, scheduled_at, type_cut });
+    await updateSchedule(args.id, { name, phone, scheduled_at, type_cut });
 
-    res.status(200).json({ message: "Agendamento atualizado!" });
+    return {
+      status: 200,
+      message: "Agendamento atualizado!",
+    };
   } catch (error) {
     console.error("Error updating schedule:", error);
-    res.status(500).json({ error: "Erro ao atualizar agendamento" });
+    return {
+      status: 500,
+      error: "Erro interno do servidor",
+      message: "Não foi possível atualizar o agendamento",
+    };
   }
 };
 
-export const removeSchedule = async (
-  req: Request<ScheduleParams>,
-  res: Response
-) => {
+export const removeSchedule = async (input: { id: number }) => {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ error: "ID do agendamento é obrigatório" });
+    if (!input.id) {
+      return {
+        status: 400,
+        error: "ID do agendamento é obrigatório",
+      };
     }
-    const deleteCount = await deleteSchedule(id);
+    const deleteCount = await deleteSchedule(input.id);
     if (deleteCount === 0) {
-      return res.status(404).json({ error: "Agendamento não encontrado" });
+      return {
+        status: 404,
+        error: "Agendamento não encontrado",
+      };
     }
-    res.status(200).json({ message: `Agendamento ${id} deletado!` });
+    return {
+      status: 200,
+      message: `Agendamento ${input.id} deletado!`,
+    };
   } catch (error) {
     console.error("Error deleting schedule:", error);
-    res.status(500).json({
+
+    return {
+      status: 500,
       error: "Erro interno do servidor",
       message: "Não foi possível deletar o agendamento",
-    });
+    };
   }
 };

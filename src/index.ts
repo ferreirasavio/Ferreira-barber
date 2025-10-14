@@ -9,36 +9,42 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  if (Buffer.isBuffer(req.body)) {
-    try {
-      req.body = JSON.parse(req.body.toString("utf8"));
-    } catch (e) {
-      return res.status(400).json({ error: "Body inválido" });
-    }
-  }
-  next();
-});
-
 app.use(routes);
 
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "Ferreira Barber API is running",
-    timestamp: new Date().toISOString(),
-  });
-});
+function autoResponder(handler: (...args: any[]) => any) {
+  return async (req: any, res: any, next: any) => {
+    try {
+      const result = await handler(req, res, next);
+      if (res.headersSent) return;
+      if (result !== undefined) {
+        res.json(result);
+      }
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+app.get(
+  "/health",
+  autoResponder(() => {
+    return {
+      status: 200,
+      message: "Ferreira Barber API is running",
+      timestamp: new Date().toISOString(),
+    };
+  })
+);
 
-app.get("/", (req, res) => {
-  res.json({ message: "API Ferreira Barber online!" });
-});
+app.get(
+  "/",
+  autoResponder(() => {
+    return { message: "API Ferreira Barber online!" };
+  })
+);
 
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
-    console.log(`📋 Health check: http://localhost:${PORT}/health`);
-    console.log(`📅 Schedules API: http://localhost:${PORT}/api/schedules`);
   });
 }
 

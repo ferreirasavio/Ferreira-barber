@@ -1,53 +1,50 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createSchedule } from "../../src/controller/schedule";
+import { TDatabase } from "../../src/db/types";
 
-// Mocke ANTES de importar o controller!
-vi.mock("../../src/db/database", () => ({
-  schedulingTime: vi.fn().mockResolvedValue({
-    id: 1,
+const args = {
+  id: 1,
+  input: {
     name: "João",
     phone: "11999999999",
     scheduled_at: "2025-09-23T10:00:00",
     type_cut: "cabelo",
-  }),
-}));
-
-import { createSchedule } from "../../src/controller/schedule";
+  },
+};
 
 describe("createSchedule", () => {
-  let req: any;
-  let res: any;
-
   beforeEach(() => {
-    req = {
-      body: {
+    vi.clearAllMocks();
+
+    vi.mock("../../src/db/database", () => ({
+      schedulingTime: vi.fn().mockResolvedValue({
+        id: 1,
         name: "João",
         phone: "11999999999",
         scheduled_at: "2025-09-23T10:00:00",
         type_cut: "cabelo",
-      },
-    };
-    res = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn(),
-    };
+      }),
+    }));
   });
 
   it("Should create schedule with success", async () => {
-    await createSchedule(req, res);
+    const response = await createSchedule(args.input as TDatabase);
 
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
+    expect(response.status).toBe(201);
+    expect(response.data).toEqual({
       id: 1,
-      ...req.body,
+      name: "João",
+      phone: "11999999999",
+      scheduled_at: "2025-09-23T10:00:00",
+      type_cut: "cabelo",
     });
   });
 
   it("Should return required data", async () => {
-    req.body = {};
-    await createSchedule(req, res);
+    const response = await createSchedule({} as TDatabase);
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
+    expect(response).toEqual({
+      status: 400,
       error: "Dados obrigatórios não informados",
       message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
     });
