@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   deleteSchedule,
   getAllSchedules,
@@ -11,25 +12,20 @@ type ScheduleArgs = {
   input: TDatabase;
 };
 
+const schemaSchedule = z.object({
+  name: z.string().min(3),
+  phone: z.string().min(10),
+  scheduled_at: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), "Data inválida"),
+  type_cut: z.enum(["cabelo", "barba", "cabelo e barba"]),
+});
+
 export const createSchedule = async (input: TDatabase) => {
   try {
-    const { name, phone, scheduled_at, type_cut } = input;
-    console.log(input);
-    if (!name || !phone || !scheduled_at || !type_cut) {
-      console.log("Input recebido:", input);
-      return {
-        status: 400,
-        error: "Dados obrigatórios não informados",
-        message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
-      };
-    }
+    const parsedInput = schemaSchedule.parse(input);
 
-    const newSchedule = await schedulingTime({
-      name,
-      phone,
-      scheduled_at,
-      type_cut,
-    });
+    const newSchedule = await schedulingTime(parsedInput);
     return {
       status: 201,
       data: newSchedule,

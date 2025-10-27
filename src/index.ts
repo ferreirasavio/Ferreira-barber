@@ -7,40 +7,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use((req, _res, next) => {
+  if (Buffer.isBuffer(req.body)) {
+    try {
+      req.body = JSON.parse(req.body.toString());
+    } catch {
+      req.body = req.body.toString();
+    }
+  }
+  next();
+});
+
 app.use(express.json());
 
 app.use(routes);
 
-function autoResponder(handler: (...args: any[]) => any) {
-  return async (req: any, res: any, next: any) => {
-    try {
-      const result = await handler(req, res, next);
-      if (res.headersSent) return;
-      if (result !== undefined) {
-        res.json(result);
-      }
-    } catch (err) {
-      next(err);
-    }
-  };
-}
-app.get(
-  "/health",
-  autoResponder(() => {
-    return {
-      status: 200,
-      message: "Ferreira Barber API is running",
-      timestamp: new Date().toISOString(),
-    };
-  })
-);
+app.get("/health", (_req, res) => {
+  res.json({
+    status: 200,
+    message: "Ferreira Barber API is running",
+    timestamp: new Date().toISOString(),
+  });
+});
 
-app.get(
-  "/",
-  autoResponder(() => {
-    return { message: "API Ferreira Barber online!" };
-  })
-);
+app.get("/", (_req, res) => {
+  res.json({ message: "API Ferreira Barber online!" });
+});
 
 if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
