@@ -11,7 +11,7 @@
     "deploy:dev": "serverless deploy --stage dev",
     "deploy:prod": "serverless deploy --stage prod",
     "offline": "serverless offline",
-    "test": "vitest",
+    "test": "vitest --watch",
     "zod": "^4.1.12"
   },
   "keywords": [],

@@ -6,6 +6,7 @@ import {
   updateSchedule,
 } from "../db/database";
 import { TDatabase } from "../db/types";
+import { normalizeDate } from "../utils/formatDate";
 
 type ScheduleArgs = {
   id?: number;
@@ -24,14 +25,36 @@ const schemaSchedule = z.object({
 export const createSchedule = async (input: TDatabase) => {
   try {
     const parsedInput = schemaSchedule.parse(input);
+    const normalizedDate = normalizeDate(parsedInput.scheduled_at);
 
-    const newSchedule = await schedulingTime(parsedInput);
+    const schedules = await getAllSchedules();
+    const alreadyScheduled = schedules.find(
+      (s) => normalizeDate(s.scheduled_at) === normalizedDate
+    );
+    if (alreadyScheduled) {
+      return {
+        status: 409,
+        error: "Já existe um agendamento para essa data e hora.",
+      };
+    }
+
+    const newSchedule = await schedulingTime({
+      ...parsedInput,
+      scheduled_at: normalizedDate,
+    });
+
     return {
       status: 201,
       data: newSchedule,
     };
   } catch (error) {
-    console.error("Error creating schedule:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        status: 400,
+        error: "Dados obrigatórios não informados",
+        message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
+      };
+    }
 
     return {
       status: 500,
@@ -60,29 +83,27 @@ export const getSchedules = async () => {
 
 export const updateFields = async (args: ScheduleArgs) => {
   try {
-    const { name, phone, scheduled_at, type_cut } = args.input;
-
+    const parsedInput = schemaSchedule.parse(args.input);
     if (!args.id) {
       return {
         status: 400,
         error: "ID do agendamento é obrigatório",
       };
     }
-
-    if (!name && !phone && !scheduled_at && !type_cut) {
-      return {
-        status: 400,
-        error: "Nenhum campo foi preenchido para atualizar",
-      };
-    }
-    await updateSchedule(args.id, { name, phone, scheduled_at, type_cut });
+    await updateSchedule(args.id, parsedInput);
 
     return {
       status: 200,
       message: "Agendamento atualizado!",
     };
   } catch (error) {
-    console.error("Error updating schedule:", error);
+    if (error instanceof z.ZodError) {
+      return {
+        status: 400,
+        message: "Nenhum campo foi preenchido para atualizar",
+      };
+    }
+
     return {
       status: 500,
       error: "Erro interno do servidor",
@@ -96,14 +117,14 @@ export const removeSchedule = async (input: { id: number }) => {
     if (!input.id) {
       return {
         status: 400,
-        error: "ID do agendamento é obrigatório",
+        message: "ID do agendamento é obrigatório",
       };
     }
     const deleteCount = await deleteSchedule(input.id);
     if (deleteCount === 0) {
       return {
         status: 404,
-        error: "Agendamento não encontrado",
+        message: "Agendamento não encontrado",
       };
     }
     return {
