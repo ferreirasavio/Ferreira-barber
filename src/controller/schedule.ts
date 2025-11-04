@@ -7,20 +7,12 @@ import {
 } from "../db/database";
 import { TDatabase } from "../db/types";
 import { normalizeDate } from "../utils/formatDate";
+import { schemaSchedule, schemaScheduleUpdate } from "../utils/schema";
 
 type ScheduleArgs = {
   id?: number;
   input: TDatabase;
 };
-
-const schemaSchedule = z.object({
-  name: z.string().min(3),
-  phone: z.string().min(10),
-  scheduled_at: z
-    .string()
-    .refine((val) => !isNaN(Date.parse(val)), "Data inválida"),
-  type_cut: z.enum(["cabelo", "barba", "cabelo e barba"]),
-});
 
 export const createSchedule = async (input: TDatabase) => {
   try {
@@ -29,7 +21,7 @@ export const createSchedule = async (input: TDatabase) => {
 
     const schedules = await getAllSchedules();
     const alreadyScheduled = schedules.find(
-      (s) => normalizeDate(s.scheduled_at) === normalizedDate
+      (val) => normalizeDate(val.scheduled_at) === normalizedDate
     );
     if (alreadyScheduled) {
       return {
@@ -83,13 +75,34 @@ export const getSchedules = async () => {
 
 export const updateFields = async (args: ScheduleArgs) => {
   try {
-    const parsedInput = schemaSchedule.parse(args.input);
+    const parsedInput = schemaScheduleUpdate.parse(args.input);
+    if (!parsedInput.scheduled_at) {
+      return {
+        status: 400,
+        error: "Data/hora do agendamento é obrigatória",
+      };
+    }
+    const normalizedDate = normalizeDate(parsedInput.scheduled_at);
     if (!args.id) {
       return {
         status: 400,
         error: "ID do agendamento é obrigatório",
       };
     }
+
+    const schedules = await getAllSchedules();
+
+    const alreadyScheduled = schedules.find(
+      (val) => normalizeDate(val.scheduled_at) === normalizedDate
+    );
+
+    if (alreadyScheduled) {
+      return {
+        status: 409,
+        error: "Já existe um agendamento para essa data e hora.",
+      };
+    }
+
     await updateSchedule(args.id, parsedInput);
 
     return {
