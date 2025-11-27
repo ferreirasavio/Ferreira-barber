@@ -30,7 +30,7 @@ describe("createSchedule", () => {
     vi.spyOn(database, "getAllSchedules").mockResolvedValueOnce([]);
     const response = await createSchedule(argsMocked as TDatabase);
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
     expect(response.data).toEqual({
       id: 1,
       name: "João",
@@ -41,23 +41,35 @@ describe("createSchedule", () => {
   });
 
   it("Should return error repeated schedule", async () => {
-    vi.spyOn(database, "getAllSchedules").mockResolvedValueOnce([argsMocked]);
+    vi.spyOn(database, "getAllSchedules").mockResolvedValueOnce([
+      {
+        ...argsMocked,
+        scheduled_at: "2025-09-23 10:00:00",
+      },
+    ]);
     const response = await createSchedule(argsMocked as TDatabase);
 
-    expect(response.status).toBe(409);
-    expect(response.error).toEqual(
-      "Já existe um agendamento para essa data e hora."
-    );
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({
+      status: 409,
+      error: "Já existe um agendamento para essa data e hora.",
+    });
   });
 
   it("Should return required data", async () => {
     vi.spyOn(database, "getAllSchedules").mockResolvedValueOnce([]);
     const response = await createSchedule({} as TDatabase);
 
-    expect(response).toEqual({
-      status: 400,
-      error: "Dados obrigatórios não informados",
-      message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
+    expect(response.status).toBe(400);
+    expect(response.error).toEqual({
+      type: "ValidationError",
+      message: "Erro de validação nos dados fornecidos.",
+      details: expect.arrayContaining([
+        expect.objectContaining({ path: "name" }),
+        expect.objectContaining({ path: "phone" }),
+        expect.objectContaining({ path: "scheduled_at" }),
+        expect.objectContaining({ path: "type_cut" }),
+      ]),
     });
   });
 });

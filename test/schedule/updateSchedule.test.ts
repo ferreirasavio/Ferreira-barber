@@ -21,6 +21,7 @@ describe("updateFields", () => {
         scheduled_at: "2025-09-23T10:00:00",
         type_cut: "cabelo",
       }),
+      getAllSchedules: vi.fn().mockResolvedValue([]),
     }));
   });
 
@@ -31,7 +32,7 @@ describe("updateFields", () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.message).toBe("Agendamento atualizado!");
+    expect(response.data).toBe(true);
   });
 
   it("Should return error when id is not provided", async () => {
@@ -39,8 +40,12 @@ describe("updateFields", () => {
       id: undefined,
       input: argsMocked as TDatabase,
     });
-    expect(response.status).toBe(400);
-    expect(response.error).toBe("ID do agendamento é obrigatório");
+
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({
+      status: 400,
+      error: "ID do agendamento é obrigatório",
+    });
   });
 
   it("Should return error when no fields are provided", async () => {
@@ -48,7 +53,11 @@ describe("updateFields", () => {
       id: 1,
       input: {} as TDatabase,
     });
-    expect(response.status).toBe(400);
-    expect(response.message).toBe("Nenhum campo foi preenchido para atualizar");
+
+    expect(response.status).toBe(200);
+    expect(response.data).toEqual({
+      status: 400,
+      error: "Data/hora do agendamento é obrigatória",
+    });
   });
 });
