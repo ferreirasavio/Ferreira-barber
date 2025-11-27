@@ -10,7 +10,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
   // Supabase já vem com SSL configurado
-  ssl: process.env.DB_HOST?.includes('supabase') ? { rejectUnauthorized: false } : false,
+  ssl: process.env.DB_HOST?.includes("supabase")
+    ? { rejectUnauthorized: false }
+    : false,
   // Configurações otimizadas para Lambda
   max: 1,
   idleTimeoutMillis: 30000,
