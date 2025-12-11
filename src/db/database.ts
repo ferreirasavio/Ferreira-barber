@@ -1,5 +1,5 @@
 import pool from "./connection";
-import { TDatabase } from "./types";
+import { TDatabase, TDatabaseUser } from "./types";
 
 export async function schedulingTime(schedule: TDatabase) {
   try {
@@ -76,6 +76,46 @@ export async function deleteSchedule(id: number) {
     return result.rowCount;
   } catch (error) {
     console.error("Error deleting schedule:", error);
+    throw error;
+  }
+}
+
+export async function createUserTable(user: TDatabaseUser) {
+  try {
+    const query = `
+      INSERT INTO users (name, email, password)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `;
+
+    const values = [user.name, user.email, user.password];
+
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+}
+
+export async function getAllUsers() {
+  try {
+    const query = `SELECT * FROM users;`;
+    const result = await pool.query(query);
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
+export async function getUserByEmail(email: string) {
+  try {
+    const query = `SELECT * FROM users WHERE email = $1 LIMIT 1;`;
+    const result = await pool.query(query, [email]);
+    return result.rows[0] || null;
+  } catch (error) {
+    console.error("Error fetching user by email:", error);
     throw error;
   }
 }

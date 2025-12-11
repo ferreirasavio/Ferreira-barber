@@ -41,7 +41,6 @@ export async function handleREST<T>(
       };
     }
 
-    // --- Custom Not Found ---
     if (error.name === "NotFoundError") {
       return {
         status: 404,
@@ -63,7 +62,6 @@ export async function handleREST<T>(
       };
     }
 
-    // --- Fallback: Internal Error ---
     return {
       status: 500,
       error: {
