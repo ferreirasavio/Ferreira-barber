@@ -5,6 +5,7 @@ import {
   removeSchedule,
   updateFields,
 } from "../controller/schedule";
+import { signIn, signUp } from "../controller/users";
 
 const router = Router();
 
@@ -27,6 +28,15 @@ router.put("/schedules/:id", async (req, res) => {
 router.delete("/schedules/:id", async (req, res) => {
   const result = await removeSchedule({ id: parseInt(req.params.id, 10) });
   res.json(result);
+});
+router.post("/signup", async (req, res) => {
+  const result = await signUp(req.body);
+  return res.json(result);
+});
+
+router.post("/signin", async (req, res) => {
+  const result = await signIn(req.body);
+  return res.json(result);
 });
 
 export default router;

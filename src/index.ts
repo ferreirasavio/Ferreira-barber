@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 import express from "express";
-import routes from "./routes";
+
+import { checkToken } from "./middleware/auth";
+import privateRoutes from "./routes/private";
+import publicRoutes from "./routes/public";
 
 dotenv.config();
 
@@ -20,7 +23,11 @@ app.use((req, _res, next) => {
 
 app.use(express.json());
 
-app.use(routes);
+app.use(publicRoutes);
+
+app.use(checkToken);
+
+app.use(privateRoutes);
 
 app.get("/health", (_req, res) => {
   res.json({

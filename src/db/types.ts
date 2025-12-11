@@ -4,3 +4,9 @@ export type TDatabase = {
   scheduled_at: string;
   type_cut: "cabelo" | "barba" | "cabelo e barba";
 };
+
+export type TDatabaseUser = {
+  name: string;
+  email: string;
+  password: string;
+};
