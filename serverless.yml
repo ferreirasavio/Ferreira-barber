@@ -18,7 +18,6 @@ provider:
     DB_PASSWORD: ${self:custom.environments.${self:provider.stage}.DB_PASSWORD}
     JWT_SECRET: ${self:custom.environments.${self:provider.stage}.JWT_SECRET}
   httpApi:
-  httpApi:
     cors:
       allowedOrigins:
         - "*"
@@ -76,4 +75,4 @@ package:
     - .git/**
     - test/**
     - "*.md"
-    - .env.example
+    - .env.*
