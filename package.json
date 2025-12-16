@@ -4,12 +4,12 @@
   "description": "",
   "main": "dist/lambda.js",
   "scripts": {
+    "dev": "dotenv -e .env.development -- ts-node src/index.ts",
+    "dev:serverless": "dotenv -e .env.development -- serverless offline --stage dev",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "deploy": "serverless deploy",
-    "deploy:dev": "serverless deploy --stage dev",
-    "deploy:prod": "serverless deploy --stage prod",
+    "start": "dotenv -e .env.production -- node dist/index.js",
+    "deploy:dev": "dotenv -e .env.development -- serverless deploy --stage dev",
+    "deploy:prod": "dotenv -e .env.production -- serverless deploy --stage prod",
     "offline": "serverless offline",
     "test": "vitest --watch",
     "zod": "^4.1.12"

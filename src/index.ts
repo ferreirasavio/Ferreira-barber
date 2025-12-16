@@ -1,11 +1,8 @@
-import dotenv from "dotenv";
 import express from "express";
 
 import { checkToken } from "./middleware/auth";
 import privateRoutes from "./routes/private";
 import publicRoutes from "./routes/public";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

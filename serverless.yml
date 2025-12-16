@@ -10,12 +10,14 @@ provider:
   memorySize: 256
   timeout: 30
   environment:
-    NODE_ENV: ${env:NODE_ENV}
-    DB_HOST: ${env:DB_HOST}
-    DB_PORT: ${env:DB_PORT}
-    DB_NAME: ${env:DB_NAME}
-    DB_USER: ${env:DB_USER}
-    DB_PASSWORD: ${env:DB_PASSWORD}
+    NODE_ENV: ${self:custom.environments.${self:provider.stage}.NODE_ENV}
+    DB_HOST: ${self:custom.environments.${self:provider.stage}.DB_HOST}
+    DB_PORT: ${self:custom.environments.${self:provider.stage}.DB_PORT}
+    DB_NAME: ${self:custom.environments.${self:provider.stage}.DB_NAME}
+    DB_USER: ${self:custom.environments.${self:provider.stage}.DB_USER}
+    DB_PASSWORD: ${self:custom.environments.${self:provider.stage}.DB_PASSWORD}
+    JWT_SECRET: ${self:custom.environments.${self:provider.stage}.JWT_SECRET}
+  httpApi:
   httpApi:
     cors:
       allowedOrigins:
@@ -50,6 +52,24 @@ custom:
   serverless-offline:
     httpPort: 3000
     host: 0.0.0.0
+
+  environments:
+    dev:
+      NODE_ENV: development
+      DB_HOST: ${env:DB_HOST}
+      DB_PORT: ${env:DB_PORT}
+      DB_NAME: ${env:DB_NAME}
+      DB_USER: ${env:DB_USER}
+      DB_PASSWORD: ${env:DB_PASSWORD}
+      JWT_SECRET: ${env:JWT_SECRET}
+    prod:
+      NODE_ENV: production
+      DB_HOST: ${env:DB_HOST}
+      DB_PORT: ${env:DB_PORT}
+      DB_NAME: ${env:DB_NAME}
+      DB_USER: ${env:DB_USER}
+      DB_PASSWORD: ${env:DB_PASSWORD}
+      JWT_SECRET: ${env:JWT_SECRET}
 
 package:
   exclude:
