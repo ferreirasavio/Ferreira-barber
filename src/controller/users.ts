@@ -1,8 +1,10 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { createUserTable, getAllUsers, getUserByEmail } from "../db/database";
 import { TDatabaseUser } from "../db/types";
 import { handleREST } from "../helpers/HandleREST";
+import { sendEmail } from "../helpers/sendEmail";
 
 export const signUp = async (user: TDatabaseUser) => {
   return handleREST(async () => {
@@ -57,5 +59,33 @@ export const signIn = async (user: TDatabaseUser) => {
       expiresIn: "8h",
     });
     return token;
+  });
+};
+
+export const forgotPasswordReset = async (email: string) => {
+  return handleREST(async () => {
+    const user = await getUserByEmail(email);
+
+    if (!user) return true;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Recuperação de senha",
+      html: `
+        <p>Você solicitou recuperação de senha.</p>
+        <p>
+          <a href="${resetLink}">
+            Clique aqui para redefinir sua senha
+          </a>
+        </p>
+        <p>Este link expira em 15 minutos.</p>
+      `,
+    });
+
+    return true;
   });
 };
