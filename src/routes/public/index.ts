@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { forgotPasswordReset, signIn, signUp } from "../../controller/users";
+import {
+  requestToken,
+  resetPassword,
+  signIn,
+  signUp,
+} from "../../controller/users";
 
 const publicRoutes = Router();
 
@@ -13,8 +18,13 @@ publicRoutes.post("/signup", async (req, res) => {
   return res.json(result);
 });
 
-publicRoutes.post("/forgot-password", async (req, res) => {
-  const result = await forgotPasswordReset(req.body.email);
+publicRoutes.post("/requestToken", async (req, res) => {
+  const result = await requestToken(req.body.email);
+  return res.json(result);
+});
+
+publicRoutes.post("/resetPassword", async (req, res) => {
+  const result = await resetPassword(req.body.token, req.body.newPassword);
   return res.json(result);
 });
 
