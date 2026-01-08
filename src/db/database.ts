@@ -119,3 +119,22 @@ export async function getUserByEmail(email: string) {
     throw error;
   }
 }
+
+export async function resetPassword(email: string, newPassword: string) {
+  try {
+    const query = `
+      UPDATE users
+      SET password = $1
+      WHERE email = $2
+      RETURNING *;
+    `;
+
+    const values = [newPassword, email];
+
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    throw error;
+  }
+}
