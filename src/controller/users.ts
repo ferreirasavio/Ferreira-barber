@@ -16,18 +16,17 @@ export const signUp = async (user: TDatabaseUser) => {
 
     const users = await getAllUsers();
     const userExists = users.find((userDb) => userDb.email === user.email);
+
     if (userExists) {
-      return {
-        status: 409,
-        error: "usuário já existe.",
-      };
+      return { status: 409, error: "usuário já existe." };
     }
 
     await createUserTable({
       ...user,
       password: hashed,
     });
-    return true;
+
+    return { status: 201, message: "Usuário criado com sucesso!" };
   });
 };
 
@@ -36,33 +35,19 @@ export const signIn = async (user: TDatabaseUser) => {
     const userDb = await getUserByEmail(user.email);
 
     if (!userDb) {
-      return {
-        status: 404,
-        error: "usuário não encontrado.",
-      };
+      return { status: 404, error: "usuário não encontrado." };
     }
 
     const passwordMatch = await bcrypt.compare(user.password, userDb.password);
 
     if (!passwordMatch) {
-      return {
-        status: 401,
-        error: "senha incorreta.",
-      };
+      return { status: 401, error: "senha incorreta." };
     }
 
     const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return {
-        status: 500,
-        error: "JWT_SECRET não configurado.",
-      };
-    }
+    const token = jwt.sign({ userId: userDb.id }, secret!, { expiresIn: "8h" });
 
-    const token = jwt.sign({ userId: userDb.id }, secret, {
-      expiresIn: "8h",
-    });
-    return token;
+    return { token, status: 200 };
   });
 };
 
