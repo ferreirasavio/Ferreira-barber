@@ -21,7 +21,7 @@ export const createSchedule = async (input: TDatabase) => {
 
     const schedules = await getAllSchedules();
     const alreadyScheduled = schedules.find(
-      (val) => normalizeDate(val.scheduled_at) === normalizedDate
+      (val) => normalizeDate(val.scheduled_at) === normalizedDate,
     );
     if (alreadyScheduled) {
       return {
@@ -33,7 +33,10 @@ export const createSchedule = async (input: TDatabase) => {
       ...parsed,
       scheduled_at: normalizedDate,
     });
-    return newSchedule;
+    return {
+      status: 201,
+      data: newSchedule,
+    };
   });
 };
 
@@ -64,7 +67,7 @@ export const updateFields = async (args: ScheduleArgs) => {
     const schedules = await getAllSchedules();
 
     const alreadyScheduled = schedules.find(
-      (val) => normalizeDate(val.scheduled_at) === normalizedDate
+      (val) => normalizeDate(val.scheduled_at) === normalizedDate,
     );
 
     if (alreadyScheduled) {

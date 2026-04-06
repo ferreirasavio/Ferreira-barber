@@ -1,5 +1,6 @@
 import express from "express";
 
+import cors from "cors";
 import { checkToken } from "./middleware/auth";
 import privateRoutes from "./routes/private";
 import publicRoutes from "./routes/public";
@@ -18,6 +19,13 @@ app.use((req, _res, next) => {
   next();
 });
 
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(express.json());
 
 app.use(publicRoutes);

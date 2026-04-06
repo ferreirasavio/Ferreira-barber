@@ -221,3 +221,4 @@ Total: **R$ 0,00/mês** para sempre! 🎉
 3. **Cold start**: Primeira execução pode ser mais lenta
 4. **Supabase**: Gratuito para sempre, sem limite de tempo
 5. **SSL**: Supabase já vem configurado com SSL
+6. **dotenv npx -- serverless deploy --stage prod**: comando pra subir lambdas em prod
