@@ -24,6 +24,7 @@ export const signUp = async (user: TDatabaseUser) => {
     await createUserTable({
       ...user,
       password: hashed,
+      role: user.role || 'user',
     });
 
     return { status: 201, message: "Usuário criado com sucesso!" };
@@ -45,9 +46,14 @@ export const signIn = async (user: TDatabaseUser) => {
     }
 
     const secret = process.env.JWT_SECRET;
-    const token = jwt.sign({ userId: userDb.id }, secret!, { expiresIn: "8h" });
+    const token = jwt.sign({ userId: userDb.id, role: userDb.role }, secret!, { expiresIn: "8h" });
 
-    return { token, status: 200 };
+    return {
+      token, status: 200, user: {
+        userId: userDb.id,
+        role: userDb.role
+      }
+    };
   });
 };
 

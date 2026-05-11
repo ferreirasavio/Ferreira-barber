@@ -7,16 +7,13 @@ export function checkToken(req: Request, res: Response, next: NextFunction) {
     return res.status(401).json({ error: "Token não enviado" });
   }
 
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : authHeader;
-
-  if (!token) {
-    return res.status(401).json({ error: "Token não enviado" });
-  }
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+
+    (req as any).user = decoded;
+
     return next();
   } catch (err) {
     return res.status(401).json({ error: "Token inválido ou expirado" });
