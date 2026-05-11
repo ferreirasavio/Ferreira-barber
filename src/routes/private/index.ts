@@ -1,20 +1,35 @@
 import { Router } from "express";
 import {
   createSchedule,
+  getMySchedules,
   getSchedules,
   removeSchedule,
   updateFields,
 } from "../../controller/schedule";
+import { checkRole } from "../../middleware/checkRole";
 
 const privateRoutes = Router();
 
 privateRoutes.post("/schedules", async (req, res) => {
-  const result = await createSchedule(req.body);
+  const userId = (req as any).user.userId
+
+  const inputWithUser = {
+    ...req.body,
+    user_id: userId
+  };
+
+  const result = await createSchedule(inputWithUser);
   res.json(result);
 });
 
-privateRoutes.get("/schedules", async (_req, res) => {
+privateRoutes.get("/schedules", checkRole(["admin"]), async (_req, res) => {
   const result = await getSchedules();
+  res.json(result);
+});
+
+privateRoutes.get("/my-schedules", async (req, res) => {
+  const userId = (req as any).user.userId;
+  const result = await getMySchedules(userId);
   res.json(result);
 });
 

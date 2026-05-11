@@ -12,7 +12,8 @@
     "deploy:prod": "dotenv -e .env.production -- serverless deploy --stage prod",
     "offline": "serverless offline",
     "test": "vitest --watch",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "seed": "ts-node src/db/seeds/createUser.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,7 @@
     "@types/node": "^24.3.1",
     "@types/pg": "^8.15.5",
     "@vitejs/plugin-react": "^5.0.4",
+    "prettier": "^3.8.3",
     "serverless": "^3.38.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-offline": "^13.3.0",

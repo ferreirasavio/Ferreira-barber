@@ -1,6 +1,7 @@
 import {
   deleteSchedule,
   getAllSchedules,
+  getScheduleById,
   schedulingTime,
   updateSchedule,
 } from "../db/database";
@@ -31,6 +32,7 @@ export const createSchedule = async (input: TDatabase) => {
     }
     const newSchedule = await schedulingTime({
       ...parsed,
+      user_id: input.user_id,
       scheduled_at: normalizedDate,
     });
     return {
@@ -44,6 +46,28 @@ export const getSchedules = async () => {
   return handleREST(async () => {
     const schedules = await getAllSchedules();
     return schedules;
+  });
+};
+
+export const getMySchedules = async (userId: number) => {
+  return handleREST(async () => {
+    if (!userId) {
+      return { status: 400, error: "ID do agendamento é obrigatório" };
+    }
+
+    const schedules = await getScheduleById(userId);
+    if (schedules.length === 0) {
+      return { status: 404, error: "Agendamento não encontrado" };
+    }
+
+    const isOwner = schedules.every((item: any) => item.user_id === userId);
+    if (!isOwner) {
+      return {
+        status: 403,
+        error: "Você não tem permissão para visualizar este agendamento."
+      };
+    }
+    return { status: 200, data: schedules };
   });
 };
 

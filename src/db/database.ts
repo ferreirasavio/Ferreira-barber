@@ -4,8 +4,8 @@ import { TDatabase, TDatabaseUser } from "./types";
 export async function schedulingTime(schedule: TDatabase) {
   try {
     const query = `
-      INSERT INTO schedules (name, phone, scheduled_at, type_cut)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO schedules (name, phone, scheduled_at, type_cut, user_id)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `;
 
@@ -14,6 +14,7 @@ export async function schedulingTime(schedule: TDatabase) {
       schedule.phone,
       schedule.scheduled_at,
       schedule.type_cut,
+      schedule.user_id
     ];
 
     const result = await pool.query(query, values);
@@ -31,6 +32,17 @@ export async function getAllSchedules() {
     return result.rows;
   } catch (error) {
     console.error("Error fetching schedules:", error);
+    throw error;
+  }
+}
+
+export async function getScheduleById(userId: number) {
+  try {
+    const query = `SELECT * from schedules WHERE user_id=$1 ORDER BY scheduled_at DESC;`
+    const result = await pool.query(query, [userId])
+    return result.rows
+  } catch (error) {
+    console.error("Error fetching schedule by id:", error);
     throw error;
   }
 }
@@ -83,12 +95,12 @@ export async function deleteSchedule(id: number) {
 export async function createUserTable(user: TDatabaseUser) {
   try {
     const query = `
-      INSERT INTO users (name, email, password)
-      VALUES ($1, $2, $3)
+      INSERT INTO users (name, email, password, role)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
 
-    const values = [user.name, user.email, user.password];
+    const values = [user.name, user.email, user.password, user.role];
 
     const result = await pool.query(query, values);
     return result.rows[0];
