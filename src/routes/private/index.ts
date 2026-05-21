@@ -28,8 +28,9 @@ privateRoutes.get("/schedules", checkRole(["admin"]), async (_req, res) => {
 });
 
 privateRoutes.get("/my-schedules", async (req, res) => {
-  const userId = (req as any).user.userId;
-  const result = await getMySchedules(userId);
+  const { userId } = req.query;
+
+  const result = await getMySchedules(parseInt(userId as any));
   res.json(result);
 });
 
