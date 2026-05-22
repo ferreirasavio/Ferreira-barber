@@ -71,7 +71,10 @@ export const requestToken = async (email: string) => {
       };
     }
 
-    const token = jwt.sign({ email: user.email }, secret, {
+    // 1. Gera o código numérico de 6 dígitos
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const token = jwt.sign({ email: user.email, code }, secret, {
       expiresIn: "15m",
     });
 
@@ -79,25 +82,25 @@ export const requestToken = async (email: string) => {
 
     if (process.env.NODE_ENV === "development") {
       console.log("=".repeat(80));
-      console.log("🔑 TOKEN DE RESET DE SENHA (DESENVOLVIMENTO)");
+      console.log("🔑 RECUPERAÇÃO DE SENHA (JWT + 6 DÍGITOS)");
       console.log("=".repeat(80));
       console.log("Email:", user.email);
-      console.log("Token:", token);
-      console.log("Link completo:", resetLink);
+      console.log("Código de 6 dígitos:", code);
+      console.log("Link completo com Token:", resetLink);
       console.log("=".repeat(80));
     }
-
     await sendEmail({
       to: user.email,
-      subject: "Recuperação de senha",
+      subject: "Código de recuperação de senha",
       html: `
-        <p>Você solicitou recuperação de senha.</p>
-        <p>
-          <a href="${resetLink}">
-            Clique aqui para redefinir sua senha
-          </a>
-        </p>
-        <p>Este link expira em 15 minutos.</p>
+        <div style="font-family: sans-serif; color: #333;">
+          <p>Você solicitou a recuperação de senha da sua conta.</p>
+          <p>Seu código de verificação é:</p>
+          <h1 style="color: #2563eb; letter-spacing: 4px; font-size: 32px; font-weight: bold;">${code}</h1>
+          <p>Clique no link abaixo para ir à página de redefinição e insira o código acima:</p>
+          <p><a href="${resetLink}" style="color: #2563eb; font-weight: bold;">Clique aqui para redefinir sua senha</a></p>
+          <p>Este código e link expiram em 15 minutos.</p>
+        </div>
       `,
     });
 
@@ -105,13 +108,20 @@ export const requestToken = async (email: string) => {
   });
 };
 
-export const resetPassword = async (token: string, newPassword: string) => {
+export const resetPassword = async (token: string, code: string, newPassword: string) => {
   return handleREST(async () => {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       return {
         status: 500,
         error: "JWT_SECRET não configurado.",
+      };
+    }
+
+    if (!code) {
+      return {
+        status: 400,
+        error: "O código de 6 dígitos é obrigatório.",
       };
     }
 
@@ -122,16 +132,23 @@ export const resetPassword = async (token: string, newPassword: string) => {
     } catch (error) {
       return {
         status: 401,
-        error: "Token inválido ou expirado.",
+        error: "O link de recuperação expirou ou é inválido.",
       };
     }
 
-    const { email } = decoded;
+    const { email, code: originalCode } = decoded;
 
-    if (!email) {
+    if (!email || !originalCode) {
       return {
         status: 400,
         error: "Token inválido.",
+      };
+    }
+
+    if (code !== originalCode) {
+      return {
+        status: 401,
+        error: "Código de verificação incorreto.",
       };
     }
 
@@ -144,7 +161,6 @@ export const resetPassword = async (token: string, newPassword: string) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
     await updateUserPassword(email, hashedPassword);
 
     return true;

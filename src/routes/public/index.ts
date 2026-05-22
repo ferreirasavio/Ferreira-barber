@@ -24,7 +24,7 @@ publicRoutes.post("/requestToken", async (req, res) => {
 });
 
 publicRoutes.post("/resetPassword", async (req, res) => {
-  const result = await resetPassword(req.body.token, req.body.newPassword);
+  const result = await resetPassword(req.body.email, req.body.token, req.body.newPassword);
   return res.json(result);
 });
 

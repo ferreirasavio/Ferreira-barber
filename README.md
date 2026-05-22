@@ -223,3 +223,4 @@ Total: **R$ 0,00/mês** para sempre! 🎉
 5. **SSL**: Supabase já vem configurado com SSL
 6. **dotenv npx -- serverless deploy --stage prod**: comando pra subir lambdas em prod
    (dotenv -e .env.production -- npx serverless deploy --stage prod)
+7. npx dotenv -e .env.production -- serverless deploy --stage prod
