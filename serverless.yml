@@ -17,6 +17,8 @@ provider:
     DB_USER: ${self:custom.environments.${self:provider.stage}.DB_USER}
     DB_PASSWORD: ${self:custom.environments.${self:provider.stage}.DB_PASSWORD}
     JWT_SECRET: ${self:custom.environments.${self:provider.stage}.JWT_SECRET}
+    RESEND_API_KEY: ${self:custom.environments.${self:provider.stage}.RESEND_API_KEY}
+    RESEND_FROM_EMAIL: ${self:custom.environments.${self:provider.stage}.RESEND_FROM_EMAIL}
   httpApi:
     cors:
       allowedOrigins:
@@ -61,6 +63,8 @@ custom:
       DB_USER: ${env:DB_USER}
       DB_PASSWORD: ${env:DB_PASSWORD}
       JWT_SECRET: ${env:JWT_SECRET}
+      RESEND_API_KEY: ${env:RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${env:RESEND_FROM_EMAIL}
     prod:
       NODE_ENV: production
       DB_HOST: ${env:DB_HOST}
@@ -69,6 +73,8 @@ custom:
       DB_USER: ${env:DB_USER}
       DB_PASSWORD: ${env:DB_PASSWORD}
       JWT_SECRET: ${env:JWT_SECRET}
+      RESEND_API_KEY: ${env:RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${env:RESEND_FROM_EMAIL}
 
 package:
   exclude:
