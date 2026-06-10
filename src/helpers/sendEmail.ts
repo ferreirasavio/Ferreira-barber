@@ -1,23 +1,26 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-type SendEmailParams = {
+interface SendEmailArgs {
   to: string;
   subject: string;
   html: string;
-};
+}
 
-export async function sendEmail({ to, subject, html }: SendEmailParams) {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("RESEND_API_KEY não configurada");
-  }
+export const sendEmail = async ({ to, subject, html }: SendEmailArgs) => {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 
-  await resend.emails.send({
-    from:
-      process.env.RESEND_FROM_EMAIL || "Ferreira Barber <no-reply@resend.dev>",
+  await transporter.sendMail({
+    from: `"Ferreira Barber" <${process.env.BREVO_FROM_EMAIL}>`,
     to,
     subject,
     html,
   });
-}
+};

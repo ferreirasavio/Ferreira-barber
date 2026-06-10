@@ -35,16 +35,18 @@ privateRoutes.get("/my-schedules", async (req, res) => {
 });
 
 privateRoutes.put("/schedules/:id", async (req, res) => {
+  const { role, userId } = (req as any).user
   const args = {
     id: parseInt(req.params.id, 10),
     input: req.body,
   };
-  const result = await updateFields(args);
+  const result = await updateFields(args, userId, role);
   res.json(result);
 });
 
 privateRoutes.delete("/schedules/:id", async (req, res) => {
-  const result = await removeSchedule({ id: parseInt(req.params.id, 10) });
+  const { role, userId } = (req as any).user
+  const result = await removeSchedule({ id: parseInt(req.params.id, 10) }, userId, role);
   res.json(result);
 });
 

@@ -5,7 +5,7 @@ import {
   schedulingTime,
   updateSchedule,
 } from "../db/database";
-import { TDatabase } from "../db/types";
+import { TDatabase, TDatabaseUser } from "../db/types";
 import { handleREST } from "../helpers/HandleREST";
 import { schemaSchedule, schemaScheduleUpdate } from "../helpers/schema";
 import { normalizeDate } from "../utils/formatDate";
@@ -71,16 +71,12 @@ export const getMySchedules = async (userId: number) => {
   });
 };
 
-export const updateFields = async (args: ScheduleArgs) => {
+export const updateFields = async (
+  args: ScheduleArgs,
+  userId: number,
+  role: TDatabaseUser['role']
+) => {
   return handleREST(async () => {
-    const parsedInput = schemaScheduleUpdate.parse(args.input);
-    if (!parsedInput.scheduled_at) {
-      return {
-        status: 400,
-        error: "Data/hora do agendamento é obrigatória",
-      };
-    }
-    const normalizedDate = normalizeDate(parsedInput.scheduled_at);
     if (!args.id) {
       return {
         status: 400,
@@ -88,10 +84,39 @@ export const updateFields = async (args: ScheduleArgs) => {
       };
     }
 
+    const parsedInput = schemaScheduleUpdate.parse(args.input);
+    if (!parsedInput.scheduled_at) {
+      return {
+        status: 400,
+        error: "Data/hora do agendamento é obrigatória",
+      };
+    }
+
+    const normalizedDate = normalizeDate(parsedInput.scheduled_at);
+
     const schedules = await getAllSchedules();
 
+    const currentSchedule = schedules.find((val) => val.id === args.id);
+
+    if (!currentSchedule) {
+      return {
+        status: 404,
+        error: "Agendamento não encontrado.",
+      };
+    }
+
+    const isOwner = currentSchedule.user_id === userId;
+    const isAdmin = role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return {
+        status: 403,
+        error: "Você não tem autorização para alterar esse agendamento.",
+      };
+    }
+
     const alreadyScheduled = schedules.find(
-      (val) => normalizeDate(val.scheduled_at) === normalizedDate,
+      (val) => normalizeDate(val.scheduled_at) === normalizedDate && val.id !== args.id,
     );
 
     if (alreadyScheduled) {
@@ -107,7 +132,11 @@ export const updateFields = async (args: ScheduleArgs) => {
   });
 };
 
-export const removeSchedule = async (input: { id: number }) => {
+export const removeSchedule = async (
+  input: { id: number },
+  userId: number,
+  role: TDatabaseUser['role']
+) => {
   return handleREST(async () => {
     if (!input.id) {
       return {
@@ -115,13 +144,34 @@ export const removeSchedule = async (input: { id: number }) => {
         message: "ID do agendamento é obrigatório",
       };
     }
+
+    const schedules = await getAllSchedules();
+    const currentSchedule = schedules.find((val) => val.id === input.id);
+
+    if (!currentSchedule) {
+      return {
+        status: 404,
+        error: "Agendamento não encontrado.",
+      };
+    }
+
+    const isOwner = currentSchedule.user_id === userId;
+    const isAdmin = role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return {
+        status: 403,
+        error: "Você não tem autorização para excluir esse agendamento.",
+      };
+    }
     const deleteCount = await deleteSchedule(input.id);
     if (deleteCount === 0) {
       return {
         status: 404,
-        message: "Agendamento não encontrado",
+        error: "Agendamento não encontrado",
       };
     }
+
     return true;
   });
 };
