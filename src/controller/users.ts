@@ -70,7 +70,6 @@ export const requestToken = async (email: string) => {
         error: "JWT_SECRET não configurado.",
       };
     }
-
     // 1. Gera o código numérico de 6 dígitos
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -108,9 +107,10 @@ export const requestToken = async (email: string) => {
   });
 };
 
-export const resetPassword = async (token: string, code: string, newPassword: string) => {
+export const resetPassword = async ({ token, code, newPassword }: { token: string; code: string; newPassword: string }) => {
   return handleREST(async () => {
     const secret = process.env.JWT_SECRET;
+
     if (!secret) {
       return {
         status: 500,
@@ -128,11 +128,14 @@ export const resetPassword = async (token: string, code: string, newPassword: st
     let decoded: any;
 
     try {
+
       decoded = jwt.verify(token, secret);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("ERRO REAL DO JWT.VERIFY:", error.message);
+
       return {
         status: 401,
-        error: "O link de recuperação expirou ou é inválido.",
+        error: `Erro no JWT: ${error.message}`,
       };
     }
 
@@ -145,7 +148,7 @@ export const resetPassword = async (token: string, code: string, newPassword: st
       };
     }
 
-    if (code !== originalCode) {
+    if (String(code).trim() !== String(originalCode).trim()) {
       return {
         status: 401,
         error: "Código de verificação incorreto.",

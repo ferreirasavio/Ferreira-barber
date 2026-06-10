@@ -17,8 +17,12 @@ provider:
     DB_USER: ${self:custom.environments.${self:provider.stage}.DB_USER}
     DB_PASSWORD: ${self:custom.environments.${self:provider.stage}.DB_PASSWORD}
     JWT_SECRET: ${self:custom.environments.${self:provider.stage}.JWT_SECRET}
-    RESEND_API_KEY: ${self:custom.environments.${self:provider.stage}.RESEND_API_KEY}
-    RESEND_FROM_EMAIL: ${self:custom.environments.${self:provider.stage}.RESEND_FROM_EMAIL}
+    SMTP_HOST: ${self:custom.environments.${self:provider.stage}.SMTP_HOST}
+    SMTP_PORT: ${self:custom.environments.${self:provider.stage}.SMTP_PORT}
+    SMTP_USER: ${self:custom.environments.${self:provider.stage}.SMTP_USER}
+    SMTP_PASS: ${self:custom.environments.${self:provider.stage}.SMTP_PASS}
+    BREVO_FROM_EMAIL: ${self:custom.environments.${self:provider.stage}.BREVO_FROM_EMAIL}
+    FRONTEND_URL: ${self:custom.environments.${self:provider.stage}.FRONTEND_URL}
   httpApi:
     cors:
       allowedOrigins:
@@ -63,8 +67,12 @@ custom:
       DB_USER: ${env:DB_USER}
       DB_PASSWORD: ${env:DB_PASSWORD}
       JWT_SECRET: ${env:JWT_SECRET}
-      RESEND_API_KEY: ${env:RESEND_API_KEY}
-      RESEND_FROM_EMAIL: ${env:RESEND_FROM_EMAIL}
+      SMTP_HOST: ${env:SMTP_HOST}
+      SMTP_USER: ${env:SMTP_USER}
+      SMTP_PORT: ${env:SMTP_PORT}
+      SMTP_PASS: ${env:SMTP_PASS}
+      BREVO_FROM_EMAIL: ${env:BREVO_FROM_EMAIL}
+      FRONTEND_URL: ${env:FRONTEND_URL}
     prod:
       NODE_ENV: production
       DB_HOST: ${env:DB_HOST}
@@ -73,8 +81,12 @@ custom:
       DB_USER: ${env:DB_USER}
       DB_PASSWORD: ${env:DB_PASSWORD}
       JWT_SECRET: ${env:JWT_SECRET}
-      RESEND_API_KEY: ${env:RESEND_API_KEY}
-      RESEND_FROM_EMAIL: ${env:RESEND_FROM_EMAIL}
+      SMTP_HOST: ${env:SMTP_HOST}
+      SMTP_USER: ${env:SMTP_USER}
+      SMTP_PORT: ${env:SMTP_PORT}
+      SMTP_PASS: ${env:SMTP_PASS}
+      BREVO_FROM_EMAIL: ${env:BREVO_FROM_EMAIL}
+      FRONTEND_URL: ${env:FRONTEND_URL}
 
 package:
   exclude:
