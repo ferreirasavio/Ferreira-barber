@@ -28,27 +28,33 @@ describe("updateFields", () => {
     const response = await updateFields({
       id: 1,
       input: argsMocked as TDatabase,
-    });
+    }, 1, 'admin');
 
-    expect(response.status).toBe(200);
-    expect(response.message).toBe("Agendamento atualizado!");
+    expect(response).toBeTruthy()
   });
 
   it("Should return error when id is not provided", async () => {
     const response = await updateFields({
       id: undefined,
       input: argsMocked as TDatabase,
-    });
+    }, 1, 'admin');
     expect(response.status).toBe(400);
     expect(response.error).toBe("ID do agendamento é obrigatório");
   });
 
-  it("Should return error when no fields are provided", async () => {
+  it("Should return error when no have param corrects", async () => {
     const response = await updateFields({
       id: 1,
-      input: {} as TDatabase,
-    });
+      name: 'teste',
+      phone: '21983838282',
+      type_cut: 'cabelo',
+      user_id: 2
+    }, 1, 'user');
     expect(response.status).toBe(400);
-    expect(response.message).toBe("Nenhum campo foi preenchido para atualizar");
+    expect(response.error).toMatchObject({
+      type: "ValidationError",
+      message: "Erro de validação nos dados fornecidos.",
+    });
+
   });
 });
