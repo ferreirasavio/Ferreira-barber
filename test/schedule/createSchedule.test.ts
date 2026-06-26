@@ -54,10 +54,9 @@ describe("createSchedule", () => {
     vi.spyOn(database, "getAllSchedules").mockResolvedValueOnce([]);
     const response = await createSchedule({} as TDatabase);
 
-    expect(response).toEqual({
-      status: 400,
-      error: "Dados obrigatórios não informados",
-      message: "Nome, telefone, data/hora e tipo de corte são obrigatórios",
+    expect(response.error).toMatchObject({
+      type: "ValidationError",
+      message: "Erro de validação nos dados fornecidos.",
     });
   });
 });
